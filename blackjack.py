@@ -11,19 +11,52 @@ MAX_SPLITS = 4
 BASE_BET = 10
 player_balance = 1000
 
-# Basic strategy tables
+# Full basic strategy tables: keys are player totals or pair ranks, values are dicts keyed by dealer upcard (2-10, 'A')
+# Actions: H=Hit, S=Stand, D=Double if allowed else Hit, Ds=Double if allowed else Stand, P=Split, R=Surrender
+
 HARD_TOTAL_STRATEGY = {
-    5:  'H', 6:  'H', 7:  'H', 8:  'H', 9:  'Dh', 10: 'Dh', 11: 'Dh', 12: 'H',
-    13: 'S', 14: 'S', 15: 'S', 16: 'S', 17: 'S', 18: 'S', 19: 'S', 20: 'S', 21: 'S'
+    5:  {2:'H',3:'H',4:'H',5:'H',6:'H',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    6:  {2:'H',3:'H',4:'H',5:'H',6:'H',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    7:  {2:'H',3:'H',4:'H',5:'H',6:'H',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    8:  {2:'H',3:'H',4:'H',5:'H',6:'H',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    9:  {2:'H',3:'D',4:'D',5:'D',6:'D',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    10: {2:'D',3:'D',4:'D',5:'D',6:'D',7:'D',8:'D',9:'D',10:'H','A':'H'},
+    11: {2:'D',3:'D',4:'D',5:'D',6:'D',7:'D',8:'D',9:'D',10:'D','A':'H'},
+    12: {2:'H',3:'H',4:'S',5:'S',6:'S',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    13: {2:'S',3:'S',4:'S',5:'S',6:'S',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    14: {2:'S',3:'S',4:'S',5:'S',6:'S',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    15: {2:'S',3:'S',4:'S',5:'S',6:'S',7:'H',8:'H',9:'R',10:'R','A':'H'},
+    16: {2:'S',3:'S',4:'S',5:'S',6:'S',7:'R',8:'R',9:'R',10:'R','A':'R'},
+    17: {2:'S',3:'S',4:'S',5:'S',6:'S',7:'S',8:'S',9:'S',10:'S','A':'S'},
+    18: {2:'S',3:'S',4:'S',5:'S',6:'S',7:'S',8:'S',9:'S',10:'S','A':'S'},
+    19: {2:'S',3:'S',4:'S',5:'S',6:'S',7:'S',8:'S',9:'S',10:'S','A':'S'},
+    20: {2:'S',3:'S',4:'S',5:'S',6:'S',7:'S',8:'S',9:'S',10:'S','A':'S'},
+    21: {2:'S',3:'S',4:'S',5:'S',6:'S',7:'S',8:'S',9:'S',10:'S','A':'S'},
 }
 
 SOFT_TOTAL_STRATEGY = {
-    13: 'H', 14: 'H', 15: 'H', 16: 'H', 17: 'H', 18: 'S', 19: 'S', 20: 'S', 21: 'S'
+    13: {2:'H',3:'H',4:'H',5:'D',6:'D',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    14: {2:'H',3:'H',4:'H',5:'D',6:'D',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    15: {2:'H',3:'H',4:'D',5:'D',6:'D',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    16: {2:'H',3:'H',4:'D',5:'D',6:'D',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    17: {2:'H',3:'D',4:'D',5:'D',6:'D',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    18: {2:'S',3:'Ds',4:'Ds',5:'Ds',6:'Ds',7:'S',8:'S',9:'H',10:'H','A':'H'},
+    19: {2:'S',3:'S',4:'S',5:'S',6:'Ds',7:'S',8:'S',9:'S',10:'S','A':'S'},
+    20: {2:'S',3:'S',4:'S',5:'S',6:'S',7:'S',8:'S',9:'S',10:'S','A':'S'},
+    21: {2:'S',3:'S',4:'S',5:'S',6:'S',7:'S',8:'S',9:'S',10:'S','A':'S'},
 }
 
 PAIR_STRATEGY = {
-    'A': 'P', '10': 'S', '9': 'P', '8': 'P', '7': 'P', '6': 'P', '5': 'Dh',
-    '4': 'H', '3': 'P', '2': 'P'
+    'A':  {2:'P',3:'P',4:'P',5:'P',6:'P',7:'P',8:'P',9:'P',10:'P','A':'P'},
+    '10': {2:'S',3:'S',4:'S',5:'S',6:'S',7:'S',8:'S',9:'S',10:'S','A':'S'},
+    '9':  {2:'P',3:'P',4:'P',5:'P',6:'P',7:'S',8:'P',9:'P',10:'S','A':'S'},
+    '8':  {2:'P',3:'P',4:'P',5:'P',6:'P',7:'P',8:'P',9:'P',10:'P','A':'P'},
+    '7':  {2:'P',3:'P',4:'P',5:'P',6:'P',7:'P',8:'H',9:'H',10:'H','A':'H'},
+    '6':  {2:'P',3:'P',4:'P',5:'P',6:'P',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    '5':  {2:'D',3:'D',4:'D',5:'D',6:'D',7:'D',8:'D',9:'D',10:'H','A':'H'},
+    '4':  {2:'H',3:'H',4:'H',5:'P',6:'P',7:'H',8:'H',9:'H',10:'H','A':'H'},
+    '3':  {2:'P',3:'P',4:'P',5:'P',6:'P',7:'P',8:'H',9:'H',10:'H','A':'H'},
+    '2':  {2:'P',3:'P',4:'P',5:'P',6:'P',7:'P',8:'H',9:'H',10:'H','A':'H'},
 }
 
 def create_deck():
@@ -53,31 +86,37 @@ def show_hand(name, hand, hide_first=False):
 
 def get_recommended_play(player_hand, dealer_upcard):
     dealer_rank = dealer_upcard[0]
-    # Convert dealer rank to numeric value for strategy lookup
+    # Convert dealer rank to string key for strategy lookup
+    dealer_key = dealer_rank
     if dealer_rank in ['J', 'Q', 'K']:
-        dealer_value = 10
+        dealer_key = '10'
     elif dealer_rank == 'A':
-        dealer_value = 11
+        dealer_key = 'A'
     else:
-        dealer_value = int(dealer_rank)
+        dealer_key = dealer_rank  # '2' through '10' as string
 
     # Check for pairs
     if len(player_hand) == 2 and player_hand[0][0] == player_hand[1][0]:
         rank = player_hand[0][0]
         pair_rank = rank
-        # For 10-value cards, unify to '10'
         if rank in ['J', 'Q', 'K']:
             pair_rank = '10'
-        play = PAIR_STRATEGY.get(pair_rank, None)
-        if play == 'P':
-            return 'Split'
-        elif play == 'Dh':
-            # Double if allowed, else hit
-            return 'Double or Hit'
-        elif play == 'H':
-            return 'Hit'
-        elif play == 'S':
-            return 'Stand'
+        if pair_rank in PAIR_STRATEGY:
+            play = PAIR_STRATEGY[pair_rank].get(dealer_key, 'H')
+            if play == 'P':
+                return 'Split'
+            elif play == 'D':
+                return 'Double or Hit'
+            elif play == 'Ds':
+                return 'Double or Stand'
+            elif play == 'H':
+                return 'Hit'
+            elif play == 'S':
+                return 'Stand'
+            elif play == 'R':
+                return 'Surrender'
+            else:
+                return 'Hit'
 
     # Check for soft hands
     soft = False
@@ -88,28 +127,33 @@ def get_recommended_play(player_hand, dealer_upcard):
     total = hand_value(player_hand)
     if soft:
         # Use soft total strategy
-        # Soft totals are counted as total - 11 (ace counted as 11)
-        # But in our dict, keys are total with ace counted as 11
-        # So we can use total directly
-        # If total not in table, find closest lower key
-        keys = sorted(SOFT_TOTAL_STRATEGY.keys())
-        lookup_total = max([k for k in keys if k <= total], default=18)
-        play = SOFT_TOTAL_STRATEGY.get(lookup_total, 'H')
+        # If total less than 13, treat as 13 for lookup to avoid key error
+        lookup_total = total if total >= 13 else 13
+        if lookup_total > 21:
+            lookup_total = 21
+        play = SOFT_TOTAL_STRATEGY.get(lookup_total, {}).get(dealer_key, 'H')
     else:
         # Hard total strategy
-        keys = sorted(HARD_TOTAL_STRATEGY.keys())
-        lookup_total = max([k for k in keys if k <= total], default=17)
-        play = HARD_TOTAL_STRATEGY.get(lookup_total, 'H')
+        lookup_total = total
+        if lookup_total < 5:
+            lookup_total = 5
+        elif lookup_total > 21:
+            lookup_total = 21
+        play = HARD_TOTAL_STRATEGY.get(lookup_total, {}).get(dealer_key, 'H')
 
     # Interpret play codes
     if play == 'H':
         return 'Hit'
     elif play == 'S':
         return 'Stand'
-    elif play == 'Dh':
+    elif play == 'D':
         return 'Double or Hit'
     elif play == 'Ds':
         return 'Double or Stand'
+    elif play == 'P':
+        return 'Split'
+    elif play == 'R':
+        return 'Surrender'
     return 'Hit'
 
 def translate_move(move):
@@ -121,6 +165,8 @@ def translate_move(move):
         return 'Split'
     elif move == 'd':
         return 'Double'
+    elif move == 'u':
+        return 'Surrender'
     else:
         return 'Unknown'
 
@@ -148,6 +194,7 @@ def play_blackjack():
         bets = [bet]
         doubles = [False]
         player_moves = [[]]  # To record moves per hand
+        surrendered = [False]  # Track if hand surrendered
 
         dealer_hand = [deck.pop(), deck.pop()]
 
@@ -161,6 +208,7 @@ def play_blackjack():
             current_bet = bets[hand_index]
             can_split = len(player_hands) < MAX_SPLITS and len(hand) == 2 and hand[0][0] == hand[1][0] and player_balance >= current_bet
             can_double = len(hand) == 2 and player_balance >= current_bet and not doubles[hand_index]
+            can_surrender = len(hand) == 2  # Only allowed on first two cards
 
             while True:
                 recommended = get_recommended_play(hand, dealer_hand[1])
@@ -169,11 +217,15 @@ def play_blackjack():
                     prompt += ", Split"
                 if can_double:
                     prompt += ", Double"
+                if can_surrender:
+                    prompt += ", Surrender"
                 prompt += "? (h/s"
                 if can_split:
                     prompt += "/p"
                 if can_double:
                     prompt += "/d"
+                if can_surrender:
+                    prompt += "/u"
                 prompt += "): "
 
                 move = input(prompt).strip().lower()
@@ -198,6 +250,7 @@ def play_blackjack():
                     bets.insert(hand_index + 1, current_bet)
                     doubles.insert(hand_index + 1, False)
                     player_moves.insert(hand_index + 1, [])
+                    surrendered.insert(hand_index + 1, False)
                     show_hand(f"Player Hand {hand_index+1}", player_hands[hand_index])
                     show_hand(f"Player Hand {hand_index+2}", player_hands[hand_index + 1])
                     can_split = len(player_hands) < MAX_SPLITS and len(player_hands[hand_index]) == 2 and player_hands[hand_index][0][0] == player_hands[hand_index][1][0] and player_balance >= bets[hand_index]
@@ -213,6 +266,13 @@ def play_blackjack():
                     show_hand(f"Player Hand {hand_index+1}", hand)
                     if hand_value(hand) > 21:
                         print("Bust!")
+                    break
+                elif move == 'u' and can_surrender:
+                    # Surrender: take half bet back, end hand immediately
+                    player_balance += current_bet // 2
+                    player_moves[hand_index].append('Surrender')
+                    surrendered[hand_index] = True
+                    print(f"Hand {hand_index+1} surrendered. Half bet returned.")
                     break
                 else:
                     print("Invalid choice. Please try again.")
@@ -236,6 +296,10 @@ def play_blackjack():
 
         # Evaluate each player hand
         for i, hand in enumerate(player_hands):
+            if surrendered[i]:
+                print(f"\nResult for Player Hand {i+1}:")
+                print("Surrendered. You lose half your bet.")
+                continue
             player_total = hand_value(hand)
             print(f"\nResult for Player Hand {i+1}:")
             if player_total > 21:
@@ -260,7 +324,7 @@ def play_blackjack():
         print(f"{'Hand':<10}{'Cards':<20}{'Moves':<30}{'Recommended':<20}{'Match':<10}")
         for i, hand in enumerate(player_hands):
             cards_str = " ".join(f"{rank}{suit}" for rank, suit in hand)
-            recommended = get_recommended_play(hand, dealer_hand[1])
+            recommended = get_recommended_play(hand, dealer_hand[1]) if not surrendered[i] else 'Surrender'
             moves_str = ", ".join(player_moves[i]) if player_moves[i] else "No moves"
             # Determine if moves matched recommendation: if any move matches recommended or if recommended is 'Double or Hit' or 'Double or Stand', consider partial match
             match = False
@@ -274,6 +338,9 @@ def play_blackjack():
                     match = True
                     break
                 if rec_lower == 'double or stand' and mv_lower in ['double', 'stand']:
+                    match = True
+                    break
+                if rec_lower == 'surrender' and mv_lower == 'surrender':
                     match = True
                     break
             match_str = "Yes" if match else "No"
